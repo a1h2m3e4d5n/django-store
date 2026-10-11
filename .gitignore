@@ -1,0 +1,30 @@
+# Environment and secrets
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.venv/
+venv/
+
+# Django generated files
+*.log
+db.sqlite3
+staticfiles/
+
+# User-generated content and backups
+media/
+backups/
+geoip/
+
+# IDE and operating-system files
+.idea/
+.vscode/
+*.iml
+.DS_Store
+Thumbs.db

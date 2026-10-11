@@ -1,0 +1,102 @@
+<!-- templates/includes/whatsapp_banner.html -->
+{% if store_config.show_whatsapp_banner %}
+<div class="whatsapp-cta-banner w-100 py-5 text-white position-relative overflow-hidden"
+     style="background: {% if store_config.whatsapp_banner_bg %}url('{{ store_config.whatsapp_banner_bg.url }}'){% else %}linear-gradient(135deg, #24150E, #4A2C1D){% endif %} center center; background-size: cover; margin-bottom: 0 !important;">
+
+    <div class="container">
+        <div class="row align-items-center position-relative g-4" style="z-index: 2;">
+
+            <!-- 1. الجهة اليمنى: نصوص إضافية اختيارية -->
+            <div class="col-md-6 text-center text-md-start">
+                {% if store_config.whatsapp_banner_right_title %}
+                    <h3 class="fw-bold mb-2" style="font-size: 24px; color: {{ store_config.whatsapp_banner_right_title_color|default:'#ffffff' }} !important;">
+                        {{ store_config.whatsapp_banner_right_title }}
+                    </h3>
+                {% endif %}
+
+                {% if store_config.whatsapp_banner_right_text %}
+                    <!-- تم إضافة فلتر linebreaksbr هنا للسماح بالنزول لسطر جديد -->
+                    <p class="mb-0 fs-5" style="color: {{ store_config.whatsapp_banner_right_text_color|default:'rgba(255, 255, 255, 0.7)' }} !important;">
+                        {{ store_config.whatsapp_banner_right_text|linebreaksbr }}
+                    </p>
+                {% endif %}
+            </div>
+
+            <!-- 2. الجهة اليسرى: النصوص الأساسية وزر الواتساب (توسيط وتناسق كامل من المنتصف) -->
+            <div class="col-md-6 d-flex flex-column align-items-center text-center {% if not store_config.whatsapp_banner_right_title and not store_config.whatsapp_banner_right_text %}ms-auto{% endif %}">
+
+                <!-- العنوان الرئيسي فوق زر الواتساب -->
+                <h3 class="fw-bold mb-2" style="font-size: 26px; color: {{ store_config.whatsapp_banner_title_color|default:'var(--gold)' }} !important;">
+                    {{ store_config.whatsapp_banner_title }}
+                </h3>
+
+                <!-- الوصف الفرعي فوق زر الواتساب -->
+                <p class="mb-4 fs-5" style="max-width: 550px; color: {{ store_config.whatsapp_banner_subtitle_color|default:'rgba(255, 255, 255, 0.8)' }} !important;">
+                    {{ store_config.whatsapp_banner_subtitle }}
+                </p>
+
+                <!-- زر الواتساب الدائري -->
+                <a href="{{ store_config.whatsapp_banner_url }}" target="_blank" class="btn btn-banner-whatsapp d-inline-flex align-items-center gap-2">
+                    <i class="bi bi-whatsapp fs-5"></i>
+                    <span>{{ store_config.whatsapp_banner_btn_text }}</span>
+                </a>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<style>
+    /* الحواف الجانبية ممتدة بالكامل وملتصقة بالفوتر */
+    .whatsapp-cta-banner {
+        border-radius: 0 !important;
+        border-bottom: none !important;
+    }
+
+    /* تعتيم الخلفية لضمان قراءة ممتازة للنصوص */
+    .whatsapp-cta-banner::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1;
+    }
+
+    /* تنسيق زر الواتساب الأخضر الرسمي */
+    .btn-banner-whatsapp {
+        background-color: #25D366 !important;
+        color: #fff !important;
+        border: none !important;
+        padding: 12px 32px;
+        font-size: 16px;
+        font-weight: 700;
+        border-radius: 50px;
+        transition: transform 0.2s ease, background-color 0.2s ease;
+        box-shadow: 0 4px 15px rgba(37, 211, 102, 0.3);
+    }
+
+    .btn-banner-whatsapp:hover {
+        background-color: #1ebd59 !important;
+        transform: scale(1.05);
+    }
+
+    /* إلغاء المسافة الفارغة مع الفوتر */
+    .whatsapp-cta-banner + .footer {
+        margin-top: 0 !important;
+    }
+
+    /* الحفاظ على خلفية الصورة كاملة 100% وبدون أي اقتصاص أو تمديد خاطئ في وضع الجوال */
+    @media (max-width: 768px) {
+        .whatsapp-cta-banner {
+            background-size: contain !important; /* إظهار الصورة بالكامل دون اقتصاص */
+            background-repeat: no-repeat !important; /* منع تكرار الصورة */
+            background-position: center center !important; /* توسيط الصورة تماماً */
+            background-color: #24150E !important; /* لون بني داكن كخلفية لملء المساحات الفارغة إذا اختلفت الأبعاد */
+        }
+    }
+</style>
+{% endif %}

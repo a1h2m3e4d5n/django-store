@@ -1,0 +1,44 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-store_db}
+      POSTGRES_USER: ${DB_USER:-store_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-store_user} -d ${DB_NAME:-store_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  web:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      DJANGO_ENV: ${DJANGO_ENV:-local}
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-true}
+      DB_NAME: ${DB_NAME:-store_db}
+      DB_USER: ${DB_USER:-store_user}
+      DB_PASSWORD: ${DB_PASSWORD:?Set DB_PASSWORD in .env}
+      DB_HOST: db
+      DB_PORT: 5432
+      MEDIA_ROOT: /app/media
+      STATIC_ROOT: /app/staticfiles
+    ports:
+      - "${APP_PORT:-8000}:8000"
+    volumes:
+      - media_data:/app/media
+      - backup_data:/app/backups
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+  media_data:
+  backup_data:

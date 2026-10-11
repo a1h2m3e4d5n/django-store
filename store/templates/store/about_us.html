@@ -1,0 +1,357 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+
+<style>
+    /* تم حصر جميع التنسيقات داخل كلاس .about-page-wrapper
+      لمنع أي تداخل مع ملف base.html الأساسي
+    */
+
+    .about-page-wrapper {
+        --store-gold-primary: #B68A35;
+        --store-gold-secondary: #D4AF37;
+        --store-gold-light: #FDF7E7;
+        --store-dark-brown: #24150E;
+    }
+
+    /* توحيد ألوان الأيقونات داخل صفحة من نحن فقط */
+    .about-page-wrapper .bi {
+        color: var(--store-gold-primary);
+        transition: color 0.3s ease;
+    }
+
+    /* استثناء أيقونة النجمة لتبقى ذهبية */
+    .about-page-wrapper .bi-star-fill {
+        color: var(--store-gold-secondary) !important;
+    }
+
+    /* تنسيق الشارة المخصصة (بدلاً من استخدام كلاس .badge العام) */
+    .about-page-wrapper .custom-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, var(--store-gold-primary), var(--store-gold-secondary));
+        color: var(--store-dark-brown);
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 700;
+        margin-bottom: 1.5rem;
+        font-size: 0.95rem;
+    }
+
+    .about-page-wrapper .custom-badge i {
+        color: var(--store-dark-brown) !important;
+        margin-right: 0.5rem;
+    }
+
+    /* توسيط محتوى الصفحة */
+    .about-page-wrapper .breadcrumb-custom {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background-color: #ffffff;
+        border-radius: 12px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .about-page-wrapper .breadcrumb-item i {
+        color: var(--store-gold-primary);
+        margin-right: 0.5rem;
+    }
+
+    .about-page-wrapper .breadcrumb-item a {
+        color: var(--store-gold-primary);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .about-page-wrapper .breadcrumb-item.active {
+        color: var(--store-dark-brown);
+        font-weight: 700;
+    }
+
+    /* تنسيق قسم الرأس */
+    .about-page-wrapper .header-section {
+        text-align: center;
+        margin-bottom: 3rem;
+        background: #ffffff;
+        padding: 2.5rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .about-page-wrapper .main-icon {
+        font-size: 3.5rem;
+        margin: 1.5rem 0;
+    }
+
+    .about-page-wrapper .main-icon i {
+        color: var(--store-gold-primary);
+    }
+
+    .about-page-wrapper .header-section h1 {
+        color: #1a1a1a;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        line-height: 1.4;
+    }
+
+    .about-page-wrapper .header-section p {
+        color: #666;
+        line-height: 1.8;
+        max-width: 700px;
+        margin: 0 auto;
+        font-size: 0.95rem;
+    }
+
+    /* تنسيق بطاقات الرؤية والرسالة والقيم */
+    .about-page-wrapper .cards-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    @media (min-width: 768px) {
+        .about-page-wrapper .cards-container {
+            flex-direction: row;
+            align-items: stretch;
+        }
+    }
+
+    .about-page-wrapper .vision-card {
+        background: #ffffff;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        flex: 1;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+    }
+
+    .about-page-wrapper .vision-card:hover {
+        border-color: var(--store-dark-brown);
+        box-shadow: 0 8px 20px rgba(36, 21, 14, 0.12);
+        transform: translateY(-5px);
+    }
+
+    .about-page-wrapper .vision-card .icon-circle {
+        width: 100px;
+        height: 100px;
+        background: var(--store-gold-light);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+        font-size: 2.5rem;
+        border: 2px solid var(--store-gold-primary);
+        transition: all 0.3s ease;
+    }
+
+    .about-page-wrapper .vision-card:hover .icon-circle {
+        background: var(--store-dark-brown);
+        border-color: var(--store-dark-brown);
+    }
+
+    .about-page-wrapper .vision-card .icon-circle i {
+        color: var(--store-gold-primary);
+    }
+
+    .about-page-wrapper .vision-card:hover .icon-circle i {
+        color: var(--store-gold-light);
+    }
+
+    .about-page-wrapper .vision-card h3 {
+        color: #1a1a1a;
+        font-size: 1.4rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .about-page-wrapper .vision-card p {
+        color: #666;
+        line-height: 1.8;
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .about-page-wrapper .arrow-icon {
+        margin: 0 0.5rem;
+        display: inline-block;
+    }
+
+    /* تنسيق قسم المميزات */
+    .about-page-wrapper .features-section {
+        background: linear-gradient(135deg, #ffffff 0%, #f9f9f9 100%);
+        border: 2px solid var(--store-gold-secondary);
+        border-radius: 15px;
+        padding: 2.5rem;
+        margin-top: 2rem;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+
+    .about-page-wrapper .features-section h3 {
+        text-align: center;
+        color: #1a1a1a;
+        font-size: 1.5rem;
+        margin-bottom: 2rem;
+        font-weight: 700;
+    }
+
+    .about-page-wrapper .feature-item {
+        text-align: center;
+        padding: 1.5rem;
+        background: #ffffff;
+        border-radius: 12px;
+        margin-bottom: 1rem;
+        border: 1px solid #e9ecef;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.04);
+    }
+
+    .about-page-wrapper .feature-item:hover {
+        border-color: var(--store-dark-brown);
+        box-shadow: 0 6px 16px rgba(36, 21, 14, 0.1);
+        transform: translateY(-3px);
+    }
+
+    .about-page-wrapper .feature-item .icon {
+        font-size: 2rem;
+        margin-bottom: 0.75rem;
+        display: block;
+    }
+
+    .about-page-wrapper .feature-item:hover .icon i {
+        color: var(--store-dark-brown);
+    }
+
+    .about-page-wrapper .feature-item h6 {
+        color: #1a1a1a;
+        font-weight: 600;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+
+    /* تأثيرات عامة للشاشات الصغيرة */
+    @media (max-width: 767px) {
+        .about-page-wrapper .header-section { padding: 1.5rem; }
+        .about-page-wrapper .header-section h1 { font-size: 1.4rem; }
+        .about-page-wrapper .main-icon { font-size: 2.5rem; }
+        .about-page-wrapper .vision-card { padding: 1.5rem; }
+        .about-page-wrapper .vision-card h3 { font-size: 1.2rem; }
+        .about-page-wrapper .features-section { padding: 1.5rem; }
+        .about-page-wrapper .features-section h3 { font-size: 1.3rem; }
+    }
+</style>
+
+<div class="about-page-wrapper container my-5">
+
+    <nav aria-label="breadcrumb" class="mb-5">
+        <ol class="breadcrumb bg-white p-3 border m-0 breadcrumb-custom">
+            <li class="breadcrumb-item">
+                <i class="bi bi-house-fill"></i>
+                <a href="{% url 'home' %}">الرئيسية</a>
+            </li>
+            <li class="breadcrumb-item active" aria-current="page">
+                <i class="bi bi-info-circle-fill"></i>من نحن
+            </li>
+        </ol>
+    </nav>
+
+    <div class="header-section">
+        <span class="custom-badge">
+            <i class="bi bi-bookmark-star"></i>مكتبة السقاف الجامعية والطبية
+        </span>
+        <div class="main-icon">
+            <i class="bi bi-book-half"></i>
+        </div>
+        <h1>شريككم الموثوق في مسيرتكم العلمية والطبية</h1>
+        <p>
+            نحن هنا لنوفر لطلاب الجامعات، الأطباء، والممارسين الصحيين في اليمن أفضل المراجع العلمية والكتب الطبية بجودة عالية وأسعار ملائمة، مع تجربة تسوق إلكترونية سهلة وسريعة تصلك أينما كنت.
+        </p>
+    </div>
+
+    <div class="cards-container">
+
+        <div class="vision-card">
+            <div class="icon-circle">
+                <i class="bi bi-eye"></i>
+            </div>
+            <h3>
+                <i class="bi bi-eye"></i> رؤيتنا
+            </h3>
+            <p>
+                <span class="arrow-icon"><i class="bi bi-arrow-left"></i></span>
+                أن نكون المنصة الأولى والرائدة في اليمن لتوفير الكتب والمراجع الطبية والجامعية، ونسهم بفعالية في دعم التعليم والبحث العلمي المستمر.
+            </p>
+        </div>
+
+        <div class="vision-card">
+            <div class="icon-circle">
+                <i class="bi bi-compass"></i>
+            </div>
+            <h3>
+                <i class="bi bi-compass"></i> رسالتنا
+            </h3>
+            <p>
+                <span class="arrow-icon"><i class="bi bi-arrow-left"></i></span>
+                تسهيل وصول المعرفة الطبية والجامعية لكل طالب وباحث من خلال متجر إلكتروني متكامل، يضمن الدقة في الاختيار والسرعة في التوصيل لجميع المحافظات.
+            </p>
+        </div>
+
+        <div class="vision-card">
+            <div class="icon-circle">
+                <i class="bi bi-gem"></i>
+            </div>
+            <h3>
+                <i class="bi bi-award"></i> قيمنا
+            </h3>
+            <p>
+                <span class="arrow-icon"><i class="bi bi-arrow-left"></i></span>
+                الجودة والمصداقية في توفير المراجع المعتمدة، التميز في خدمة العملاء، والشغف الدائم بالمساهمة في بناء جيل طبي متميز ومثقف.
+            </p>
+        </div>
+    </div>
+
+    <div class="features-section">
+        <h3>
+            <i class="bi bi-star-fill"></i> ما يميز تجربة التسوق معنا
+        </h3>
+        <div class="row g-3">
+            <div class="col-6 col-md-3">
+                <div class="feature-item">
+                    <span class="icon"><i class="bi bi-truck"></i></span>
+                    <h6>توصيل سريع وآمن</h6>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="feature-item">
+                    <span class="icon"><i class="bi bi-wallet2"></i></span>
+                    <h6>طرق دفع مرنة</h6>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="feature-item">
+                    <span class="icon"><i class="bi bi-shield-check"></i></span>
+                    <h6>مراجع معتمدة 100%</h6>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="feature-item">
+                    <span class="icon"><i class="bi bi-headset"></i></span>
+                    <h6>دعم متواصل عبر واتساب</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

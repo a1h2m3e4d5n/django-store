@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5" style="direction: rtl; text-align: right;">
+    <h2 class="mb-4 fw-bold text-dark"><i class="fa-solid fa-credit-card text-success me-2"></i> إتمام عملية الشراء</h2>
+
+    <form method="POST" id="checkout-form">
+        {% csrf_token %}
+
+        <!-- تعديل 3: حقول مخفية تُرسل تفاصيل الشراء المباشر للسيرفر عند التأكيد إن وجدت -->
+        {% if is_direct_buy %}
+            <input type="hidden" name="direct_book_id" value="{{ direct_book.id }}">
+            <input type="hidden" name="direct_quantity" value="{{ direct_quantity }}">
+        {% endif %}
+
+        <div class="row g-4">
+            <!-- اليمين: بيانات العميل والشحن والدفع -->
+            <div class="col-lg-7">
+                <div class="card p-4 shadow-sm border border-light mb-4 rounded-3 bg-white">
+                    <h5 class="mb-3 fw-bold text-dark"><i class="fa-solid fa-user text-success me-2"></i> بيانات الشحن والتوصيل</h5>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">الاسم الكامل</label>
+                        <input type="text" name="customer_name" class="form-control" placeholder="مثال: محمد أحمد علي" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-secondary small fw-bold">رقم الهاتف (واتساب مفضل)</label>
+                            <input type="text" name="customer_phone" class="form-control" placeholder="77xxxxxxx" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label text-secondary small fw-bold">البريد الإلكتروني</label>
+                            <input type="email" name="customer_email" class="form-control" placeholder="name@example.com" required>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">المدينة / المحافظة</label>
+                        <input type="text" name="city" class="form-control" placeholder="صنعاء، عدن ..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-secondary small fw-bold">العنوان بالتفصيل</label>
+                        <textarea name="address_details" class="form-control" rows="2" placeholder="الشارع، بجوار معلم بارز، رقم المنزل..." required></textarea>
+                    </div>
+                </div>
+
+                <div class="card p-4 shadow-sm border border-light mb-4 rounded-3 bg-white">
+                    <h5 class="mb-3 fw-bold text-dark"><i class="fa-solid fa-truck text-success me-2"></i> طريقة الشحن</h5>
+                    {% for method in delivery_methods %}
+                    <div class="border rounded p-3 mb-2 method-card bg-light-hover" style="cursor: pointer;" onclick="document.getElementById('delivery_{{ method.id }}').click();">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <input type="radio" name="delivery_method" id="delivery_{{ method.id }}" value="{{ method.id }}" data-cost="{{ method.cost }}" class="delivery-radio" required>
+                                <strong class="ms-2 text-dark">{{ method.name }}</strong>
+                            </div>
+                            <span class="text-success fw-bold">
+                                {% if method.cost == 0 %} مجاناً {% else %} {{ method.cost }} ر.ي {% endif %}
+                            </span>
+                        </div>
+                        <div class="method-desc mt-2 text-muted small d-none">
+                            {{ method.description }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <div class="card p-4 shadow-sm border border-light mb-4 rounded-3 bg-white">
+                    <h5 class="mb-3 fw-bold text-dark"><i class="fa-solid fa-money-bill-wave text-success me-2"></i> طرق الدفع</h5>
+                    {% for method in payment_methods %}
+                    <div class="border rounded p-3 mb-2 method-card bg-light-hover" style="cursor: pointer;" onclick="document.getElementById('payment_{{ method.id }}').click();">
+                        <div>
+                            <input type="radio" name="payment_method" id="payment_{{ method.id }}" value="{{ method.id }}" class="payment-radio" required>
+                            <strong class="ms-2 text-dark">{{ method.name }}</strong>
+                        </div>
+                        <div class="payment-instructions mt-2 text-primary small d-none p-2 bg-light rounded" style="line-height: 1.6;">
+                            {{ method.instructions|linebreaks }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- اليسار: ملخص الحسابات والمنتجات المعروضة -->
+            <div class="col-lg-5">
+                <div class="card p-4 shadow-sm border-0 bg-light sticky-top rounded-3" style="top: 20px;">
+                    <h5 class="mb-3 fw-bold text-dark">ملخص الطلب</h5>
+
+                    <!-- تعديل 1: إظهار كرت المنتج المشترى فوراً لو كانت العملية "اشتر الآن" -->
+                    {% if is_direct_buy %}
+                    <div class="d-flex align-items-center bg-white p-2 rounded border mb-3 shadow-sm">
+                        {% if direct_book.cover_image %}
+                            <img src="{{ direct_book.cover_image.url }}" class="rounded bg-light" style="width: 55px; height: 65px; object-fit: contain;" alt="{{ direct_book.title }}">
+                        {% endif %}
+                        <div class="ms-3 flex-grow-1 px-2">
+                            <h6 class="fw-bold text-dark m-0 small text-truncate" style="max-width: 200px;">{{ direct_book.title }}</h6>
+                            <small class="text-muted d-block mt-1">الكمية: {{ direct_quantity }} × {{ direct_book.current_price }} ر.ي</small>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <div class="d-flex justify-content-between mb-2 text-secondary">
+                        <span>إجمالي المنتجات:</span>
+                        <span><span id="subtotal-val">{{ subtotal }}</span> ر.ي</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-danger d-none" id="discount-row">
+                        <span>الخصم (<span id="discount-pct">0</span>%):</span>
+                        <span>-<span id="discount-val">0</span> ر.ي</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 text-secondary">
+                        <span>تكلفة التوصيل:</span>
+                        <span><span id="shipping-val">0</span> ر.ي</span>
+                    </div>
+                    <hr class="text-muted">
+                    <div class="d-flex justify-content-between mb-4">
+                        <strong class="fs-5 text-dark">الإجمالي الكلي:</strong>
+                        <strong class="fs-5 text-success"><span id="grand-total-val">{{ subtotal }}</span> ر.ي</strong>
+                    </div>
+
+                    <div class="input-group mb-3 shadow-sm rounded">
+                        <input type="text" id="coupon-input" class="form-control" placeholder="أدخل كود الخصم">
+                        <button class="btn btn-success fw-bold" type="button" id="apply-coupon-btn">تطبيق</button>
+                    </div>
+                    <div id="coupon-msg" class="small mb-3"></div>
+                    <input type="hidden" name="coupon_code_applied" id="coupon-hidden-input">
+
+                    <button type="submit" class="btn btn-success w-100 py-2.5 fs-5 fw-bold rounded-pill shadow-sm">
+                        <i class="fa-solid fa-circle-check me-1"></i> تأكيد وإرسال الطلب
+                    </button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // تعديل 2: قراءة السعر ديناميكياً سواء كان للسلة أو للشراء المباشر
+    const subtotal = parseFloat("{{ subtotal }}");
+    let shippingCost = 0;
+    let discountPercentage = 0;
+
+    function calculateTotals() {
+        let discountAmount = (subtotal * discountPercentage) / 100;
+        let finalTotal = (subtotal - discountAmount) + shippingCost;
+
+        document.getElementById("shipping-val").innerText = shippingCost;
+        document.getElementById("discount-val").innerText = discountAmount;
+        document.getElementById("grand-total-val").innerText = finalTotal;
+
+        if (discountPercentage > 0) {
+            document.getElementById("discount-row").classList.remove("d-none");
+            document.getElementById("discount-pct").innerText = discountPercentage;
+        }
+    }
+
+    // إدارة نقرات الراديو للشحن وتفاصيله
+    document.querySelectorAll(".delivery-radio").forEach(radio => {
+        radio.addEventListener("change", function() {
+            document.querySelectorAll(".method-desc").forEach(d => d.classList.add("d-none"));
+            const targetDesc = this.closest(".method-card").querySelector(".method-desc");
+            if(targetDesc) targetDesc.classList.remove("d-none");
+
+            shippingCost = parseFloat(this.getAttribute("data-cost"));
+            calculateTotals();
+        });
+    });
+
+    // إدارة طرق الدفع وتعليماتها
+    document.querySelectorAll(".payment-radio").forEach(radio => {
+        radio.addEventListener("change", function() {
+            document.querySelectorAll(".payment-instructions").forEach(d => d.classList.add("d-none"));
+            const targetInstructions = this.closest(".method-card").querySelector(".payment-instructions");
+            if(targetInstructions) targetInstructions.classList.remove("d-none");
+        });
+    });
+
+    // أكواد الخصم والكوبونات
+    document.getElementById("apply-coupon-btn").addEventListener("click", function() {
+        const code = document.getElementById("coupon-input").value.trim();
+        const msgDiv = document.getElementById("coupon-msg");
+        if(!code) return;
+
+        fetch(`/validate-coupon/?code=${code}`)
+            .then(res => res.json())
+            .then(data => {
+                if(data.valid) {
+                    discountPercentage = data.percentage;
+                    document.getElementById("coupon-hidden-input").value = code;
+                    msgDiv.className = "small mb-3 text-success fw-bold";
+                    msgDiv.innerText = `تم تطبيق الخصم بنجاح ${data.percentage}%!`;
+                    calculateTotals();
+                } else {
+                    msgDiv.className = "small mb-3 text-danger fw-bold";
+                    msgDiv.innerText = "كود الخصم منتهي أو غير صحيح.";
+                }
+            });
+    });
+});
+</script>
+
+<style>
+.bg-light-hover:hover { background-color: #f8f9fa !important; transition: 0.2s ease-in-out; }
+.form-control:focus { border-color: #198754; box-shadow: 0 0 0 0.25rem rgba(25, 135, 84, 0.25); }
+</style>
+{% endblock %}

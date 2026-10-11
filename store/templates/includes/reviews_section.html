@@ -1,0 +1,178 @@
+<!-- قسم تقييمات المتجر في تذييل الصفحة -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<style>
+    .reviews-section {
+        background-color: #fcfcfc;
+        padding: 25px 0;
+    }
+    .review-card {
+        background: #fff;
+        border-radius: 20px;
+        padding: 30px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+        height: 100%;
+        border: 1px solid #f0f0f0;
+        position: relative;
+        transition: transform 0.3s ease;
+    }
+    .review-card:hover {
+        transform: translateY(-5px);
+    }
+    .quote-icon {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 40px;
+        color: #e9ecef;
+        z-index: 0;
+    }
+    .customer-info {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+        position: relative;
+        z-index: 1;
+    }
+    .avatar-circle {
+        width: 45px;
+        height: 45px;
+        background-color: #008ecc;
+        color: white;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-left: 12px;
+        font-size: 18px;
+    }
+    .review-text {
+        color: #555;
+        line-height: 1.6;
+        font-size: 14px;
+        margin-bottom: 15px;
+        min-height: 60px;
+    }
+    .stars-color {
+        color: #ffc107;
+        font-size: 13px;
+    }
+</style>
+
+<section class="reviews-section">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h2 class=" fw-bold mb-1">
+                    <i class=" bi-star-fill text-warning me-2"></i>
+                    آراء عملائنا</h2>
+                <p class="text-muted small">نفتخر بتقديم أفضل خدمة لآلاف القراء</p>
+            </div>
+            <button class="btn btn-outline-success rounded-pill px-4 btn-sm fw-bold" data-bs-toggle="modal" data-bs-target="#addReviewModal">
+                أضف تجربتك
+            </button>
+        </div>
+
+        <!-- السلايدر -->
+        <div class="swiper reviewsSwiper">
+            <div class="swiper-wrapper">
+                {% for review in approved_reviews %}
+                <div class="swiper-slide">
+                    <div class="review-card">
+                        <i class="fa-solid fa-quote-left quote-icon"></i>
+                        <div class="customer-info">
+                            <div class="avatar-circle">
+                                {{ review.customer_name|slice:":1" }}
+                            </div>
+                            <div>
+                                <!-- تم وضع العلامة الزرقاء SVG بجانب الاسم مباشرة وضبط المحاذاة بدقة -->
+                                <h6 class="mb-0 fw-bold d-inline-flex align-items-center" style="gap: 5px;">
+                                    {{ review.customer_name }}
+                                    <!-- أيقونة التوثيق الزرقاء المضمونة SVG -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#1da1f2" viewBox="0 0 16 16" title="عميل موثق">
+                                        <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
+                                    </svg>
+                                </h6>
+                                <div class="d-flex align-items-center mt-1">
+                                    <span class="text-muted" style="font-size: 10px;">{{ review.created_at|date:"Y/m/d" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="stars-color mb-2">
+                             {% if review.rating == 1 %}⭐{% elif review.rating == 2 %}⭐⭐{% elif review.rating == 3 %}⭐⭐⭐{% elif review.rating == 4 %}⭐⭐⭐⭐{% else %}⭐⭐⭐⭐⭐{% endif %}
+                                {% if forloop.counter <= review.rating %}
+                                    <i class="fa-solid fa-star"></i>
+                                {% else %}
+                                    <i class="fa-regular fa-star"></i>
+                                {% endif %}
+                        </div>
+                        <p class="review-text">"{{ review.comment }}"</p>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center w-100 py-5">
+                    <p class="text-muted">كن أول من يشاركنا رأيه!</p>
+                </div>
+                {% endfor %}
+            </div>
+            <!-- نقاط التنقل -->
+            <div class="swiper-pagination mt-4"></div>
+        </div>
+    </div>
+</section>
+
+<!-- استيراد مكتبة Swiper JS -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    var swiper = new Swiper(".reviewsSwiper", {
+        slidesPerView: 1,
+        spaceBetween: 20,
+        autoplay: { delay: 4000 },
+        pagination: { el: ".swiper-pagination", clickable: true },
+        breakpoints: {
+            640: { slidesPerView: 1 },
+            768: { slidesPerView: 2 },
+            1024: { slidesPerView: 3 },
+        },
+    });
+</script>
+
+<!-- نافذة إضافة تقييم (Modal) -->
+<div class="modal fade" id="addReviewModal" tabindex="-1" aria-labelledby="addReviewModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header navbar navbar-expand-lg bg-success text-white">
+                <h5 class="modal-title" id="addReviewModalLabel">إضافة تقييم للمتجر</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="{% url 'add_store_review' %}" method="POST">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold">الاسم</label>
+                        <input type="text" name="name" class="form-control" placeholder="أدخل اسمك" required>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold">التقييم</label>
+                        <select name="rating" class="form-select" required>
+                            <option value="5">⭐⭐⭐⭐⭐ (ممتاز)</option>
+                            <option value="4">⭐⭐⭐⭐ (جيد جداً)</option>
+                            <option value="3">⭐⭐⭐ (جيد)</option>
+                            <option value="2">⭐⭐ (مقبول)</option>
+                            <option value="1">⭐ (ضعيف)</option>
+                        </select>
+                    </div>
+                    <div class="mb-3 text-start">
+                        <label class="form-label fw-bold">رأيك في المتجر</label>
+                        <textarea name="comment" class="form-control" rows="4" placeholder="اكتب تجربتك هنا..." required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">إلغاء</button>
+                    <button type="submit" class="btn btn-success px-4">إرسال التقييم</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

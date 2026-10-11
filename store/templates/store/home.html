@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- استيراد مكتبة Swiper -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<style>
+
+    .hero-banner {
+        background: linear-gradient(135deg, var(--accent-color) 0%, var(--primary-color) 100%);
+        border-radius: 20px;
+        padding: 40px 20px;
+        margin-bottom: 30px;
+        color: white;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+</style>
+
+<!-- 1. الهيدر الرئيسي -->
+<div class="hero-banner">
+    <div class="container-fluid">
+        <h1 class="display-5 fw-bold mb-3">اكتشف عالم المعرفة الطبية والجامعية</h1>
+        <p class="fs-5 text-light-50 m-0">أفضل المراجع العلمية بين يديك بضغطة زر واحدة وعبر شحن سريع</p>
+    </div>
+</div>
+
+<!-- 2. الأقسام الموصى بها (استدعاء المكون المدمج) -->
+{% if featured_categories %}
+<div class="mb-5">
+    <h5 class="bi bi-justify fw-bold mb-3 text-dark"><i class="fa-solid fa-star text-warning me-2"></i> الأقسام الموصى بها</h5>
+    {% include 'includes/quick_cats.html' with categories_list=featured_categories %}
+</div>
+{% endif %}
+
+<!-- 3. أحدث المراجع (شبكة ثابتة باستدعاء بطاقات الكتب المدمجة) -->
+<h4 class="bi bi-justify fw-bold mb-4 text-dark"><i class="fa-solid fa-fire text-danger me-2"></i> أحدث المراجع والكتب المتوفرة</h4>
+<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 mb-5">
+    {% for book in latest_books %}
+    <div class="col">
+        {% include 'includes/book_card.html' with book=book show_cart_btn=true %}
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5">
+        <p class="text-muted fs-5">لا توجد كتب معروضة حالياً.</p>
+    </div>
+    {% endfor %}
+</div>
+
+
+{% if dynamic_layout %}
+    {% for block in dynamic_layout %}
+        {% if block.type == 'quick_cats' %}
+             {% include 'includes/quick_cats.html' with categories_list=block.categories section_title=block.title section_icon=block.icon %}
+
+        {% elif block.type == 'book_slider' %}
+            {% include 'includes/swiper_slider.html' with cat_id=block.category_id slider_title=block.title section_icon=block.icon books_list=block.books %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+
+
+<!-- استيراد ملف JS لـ Swiper ومكتبات التشغيل مدمجة تلقائياً داخل المكونات الفرعية -->
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+{% endblock %}

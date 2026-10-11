@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<style>
+    :root {
+        --primary-color: #d4af37; /* اللون الذهبي */
+        --text-dark: #4e342e; /* اللون البني للنصوص */
+        --bg-light: #f8f9fa;
+        --card-bg: #ffffff;
+    }
+
+    body {
+        background-color: var(--bg-light);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    /* تنسيق البانر العلوي */
+    .banner-container {
+        width: 100%;
+        margin-bottom: 25px;
+        border-radius: 15px;
+        overflow: hidden;
+    }
+    .banner-container img {
+        width: 100%;
+        height: auto;
+        object-fit: cover;
+    }
+
+    /* Swiper للمنتجات */
+    .product-swiper {
+        padding: 5px 5px 35px !important;
+    }
+
+    /* تخصيص أزرار التنقل للسلايدر */
+    .swiper-button-next, .swiper-button-prev {
+        color: var(--primary-color) !important;
+        background: rgba(255,255,255,0.9);
+        width: 40px !important;
+        height: 40px !important;
+        border-radius: 50%;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        transition: color 0.3s ease;
+    }
+
+    .swiper-button-next:hover, .swiper-button-prev:hover {
+        color: #b8860b !important; /* لون ذهبي غامق عند التمرير */
+    }
+
+    .swiper-button-next:after, .swiper-button-prev:after {
+        font-size: 18px !important;
+    }
+
+    @media (max-width: 768px) {
+        .swiper-button-next, .swiper-button-prev {
+            display: none !important;
+        }
+    }
+</style>
+
+<div class="swiper banner-container">
+    <div class="swiper-wrapper">
+        {% for banner in banners %}
+            <div class="swiper-slide">
+                <img src="{{ banner.image.url }}" alt="Banner">
+            </div>
+        {% endfor %}
+    </div>
+    <div class="swiper-pagination"></div>
+</div>
+
+{% if quick_cats %}
+    {% include 'includes/quick_cats.html' with categories_list=quick_cats %}
+{% endif %}
+
+{% for section in sections_data %}
+    <!-- تمت إزالة العنوان من هنا لأنه أصبح جزءاً من قالب بطائق الكتب المستقل -->
+
+    <div class="swiper product-swiper mt-4">
+        <div class="swiper-wrapper">
+            {% for book in section.books %}
+                <div class="swiper-slide">
+                    {% include 'includes/book_card.html' with book=book show_cart_btn=true %}
+                </div>
+            {% endfor %}
+        </div>
+        <div class="swiper-button-next"></div>
+        <div class="swiper-button-prev"></div>
+    </div>
+{% endfor %}
+
+
+
+{% if dynamic_layout %}
+    {% for block in dynamic_layout %}
+        {% if block.type == 'quick_cats' %}
+             {% include 'includes/quick_cats.html' with categories_list=block.categories section_title=block.title section_icon=block.icon %}
+
+        {% elif block.type == 'book_slider' %}
+            {% include 'includes/swiper_slider.html' with cat_id=block.category_id slider_title=block.title section_icon=block.icon books_list=block.books %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // تشغيل البانر العلوي
+        new Swiper('.banner-container', {
+            loop: true,
+            autoplay: { delay: 5000, disableOnInteraction: false },
+            pagination: { el: '.swiper-pagination', clickable: true },
+        });
+
+        // تشغيل سلايدرات الكتب بناءً على التنسيق والإعدادات الخاصة بهذه الصفحة
+        const productSwipers = document.querySelectorAll('.product-swiper');
+        productSwipers.forEach(el => {
+            new Swiper(el, {
+                slidesPerView: 2.2,
+                spaceBetween: 15,
+                loop: true,
+                autoplay: { delay: 3000, disableOnInteraction: true },
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                breakpoints: {
+                    768: { slidesPerView: 4 },
+                    1024: { slidesPerView: 5 },
+                    1200: { slidesPerView: 6 }
+                },
+                grabCursor: true,
+            });
+        });
+    });
+</script>
+{% endblock %}

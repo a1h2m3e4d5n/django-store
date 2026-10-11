@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📚 مكتبة السقاف الطبية والجامعية</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.rtl.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* تم تفعيل الهامش السفلي لضمان عدم تغطية بار الجوال الأبيض للفوتر */
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            padding-bottom: 80px !important;
+        }
+        .navbar { box-shadow: 0 2px 10px rgba(0,0,0,0.1); background-color: #212529!important; }
+        .hamburger-btn { background: none; border: none; color: white; font-size: 24px; padding: 5px 10px; cursor: pointer; }
+        .offcanvas { width: 300px!important; border: none!important; z-index: 100000 !important; }
+        .offcanvas-header { border-bottom: 1px solid #eee; padding: 20px; }
+        .offcanvas-body { padding: 0; }
+
+        /* [تعديل] تلوين روابط القائمة الجانبية بالبني عند تمرير الماوس */
+        .sidebar-link { display: flex; align-items: center; padding: 15px 20px; color: #333; text-decoration: none; font-weight: 600; border-bottom: 1px solid #f5f5f5; transition: background 0.2s, color 0.2s; }
+        .sidebar-link:hover { background-color: #f9f9f9; color: var(--brown) !important; }
+        .sidebar-link:hover i.main-icon { color: var(--brown) !important; }
+
+        .sidebar-link i.main-icon, .accordion-button-custom i.main-icon { width: 25px; font-size: 18px; margin-left: 15px; color: #666; text-align: center; }
+        .accordion-button-custom { width: 100%; background: none; border: none; display: flex; align-items: center; padding: 15px 20px; font-weight: 600; color: #333; border-bottom: 1px solid #f5f5f5; text-align: right; }
+        .accordion-button-custom:after { content: "\F282"; font-family: "bootstrap-icons"; font-size: 12px; color: #999; margin-right: auto; transition: transform 0.3s; }
+        .accordion-button-custom:not(.collapsed):after { transform: rotate(180deg); }
+        .sub-menu { background-color: #fcfcfc; }
+
+        /* [تعديل] تلوين روابط القائمة الفرعية بالبني عند تمرير الماوس */
+        .sub-menu-item { padding: 12px 60px 12px 20px; display: block; color: #555; text-decoration: none; font-size: 14px; border-bottom: 1px solid #f9f9f9; transition: color 0.2s, background 0.2s; }
+        .sub-menu-item:hover { color: var(--brown) !important; background: #f1f1f1; }
+
+        .sidebar-footer { padding: 20px; border-top: 1px solid #eee; margin-top: auto; text-align: center; }
+
+        /* تنسيق الفوتر المطور ليظهر في الجوال والكمبيوتر بوضوح */
+        .footer {
+            background-color: #212529;
+            color: #fff;
+            padding: 40px 0;
+            margin-top: 0 !important;
+            border-top: 4px solid var(--gold);
+            position: relative;
+            z-index: 1020;
+        }
+        .social-links-footer a { color: #fff; font-size: 20px; margin-left: 15px; text-decoration: none; transition: color 0.2s; }
+        .social-links-footer a:hover { color: var(--gold); }
+
+        /* بار الجوال السفلي الأبيض */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 65px;
+            background: #fff;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            box-shadow: 0 -2px 15px rgba(0,0,0,0.1);
+            z-index: 1030;
+            border-top: 1px solid #eee;
+        }
+        .bottom-nav-item { display: flex; flex-direction: column; align-items: center; color: #666 !important; text-decoration: none; font-size: 11px; font-weight: 600; transition: color 0.2s; }
+        .bottom-nav-item i { font-size: 20px; margin-bottom: 4px; color: #666 !important; transition: color 0.2s; }
+        .bottom-nav-item span { color: #666 !important; transition: color 0.2s; }
+
+        /* [إضافة] تفاعلية وحركية الأيقونات عند تمرير الفأرة على أزرار الشريط السفلي */
+        .bottom-nav-item:hover,
+        .bottom-nav-item:hover i,
+        .bottom-nav-item:hover span {
+            color: var(--bs-brown) !important;
+        }
+
+        /* لون العنصر النشط active بالبني المعتمد */
+        .bottom-nav-item.active,
+        .bottom-nav-item.active i,
+        .bottom-nav-item.active span {
+            color: var(--bs-brown) !important;
+            font-weight: 600;
+        }
+
+        /* تنسيق بوكس البحث المطور */
+        .search-group-wrapper { max-width: 500px; width: 100%; margin: 0 15px; }
+        .search-select-custom { border-top-right-radius: 50px !important; border-bottom-right-radius: 50px !important; border-top-left-radius: 0px !important; border-bottom-left-radius: 0px !important; background-color: #f8f9fa; font-size: 13px; font-weight: 600; max-width: 130px; border-left: 0 !important; }
+        .search-input-custom { border-radius: 0px !important; font-size: 14px; }
+        .search-btn-custom { border-top-left-radius: 50px !important; border-bottom-left-radius: 50px !important; border-top-right-radius: 0px !important; border-bottom-right-radius: 0px !important; padding-left: 20px; padding-right: 20px; }
+
+        @media (min-width: 992px) {
+            .bottom-nav { display: none !important; }
+            body { padding-bottom: 0 !important; }
+        }
+        @media (max-width: 768px) {
+            .navbar .container { flex-wrap: wrap; }
+            .search-group-wrapper { order: 3; max-width: 100%; margin: 10px 0 0 0; }
+        }
+
+        :root {
+            --gold:#D4AF37;
+            --gold-light:#E6C76A;
+            --brown:#3A2417;
+            --brown-soft:#5A3A28;
+            --bg:#F6F1E9;
+            --bs-brown: #8B4513;        /* بني غامق */
+            --bs-brown-light: #D2B48C;  /* بني فاتح للعنصر النشط */
+        }
+
+        body {
+            background:var(--bg);
+        }
+
+        .navbar {
+            background:#24150E!important;
+            border-bottom:2px solid var(--gold);
+        }
+
+        .navbar-brand {
+            color:var(--gold)!important;
+            font-weight:800;
+            letter-spacing:.5px;
+        }
+
+        .hero-banner {
+            background: linear-gradient(135deg, #24150E, #4A2C1D)!important;
+            box-shadow: 0 15px 40px rgba(0,0,0,.25);
+        }
+
+        .hero-banner h1 { color:#fff; }
+        .hero-banner p { color:#E7D9B9; }
+
+        .book-card {
+            background:white;
+            border:none;
+            border-radius:20px;
+            overflow:hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,.12);
+        }
+
+        .book-card:hover {
+            transform:translateY(-10px);
+            box-shadow: 0 20px 45px rgba(0,0,0,.18);
+        }
+
+        .book-card .card-title { color:#2C1B12; }
+
+        .btn-success {
+            background:linear-gradient(135deg, #B68A35, #D4AF37)!important;
+            border:none!important;
+            color:#24150E!important;
+            font-weight:700!important;
+        }
+
+        .btn-success:hover { filter:brightness(.95); }
+
+        .btn-outline-success {
+            border:2px solid var(--gold)!important;
+            color:var(--gold)!important;
+        }
+
+        .btn-outline-success:hover {
+            background:var(--gold)!important;
+            color:#24150E!important;
+        }
+
+        .quick-cat-img-wrapper {
+            background:white;
+            border:2px solid rgba(212,175,55,.3);
+            box-shadow: 0 8px 20px rgba(0,0,0,.08);
+        }
+
+        .footer {
+            background:#1A0F0A!important;
+            border-top:3px solid var(--gold);
+        }
+
+        .review-card {
+            background:white;
+            border-radius:24px;
+            box-shadow: 0 12px 30px rgba(0,0,0,.1);
+        }
+
+        .avatar-circle { background:var(--gold)!important; color:#24150E!important; }
+        .swiper-pagination-bullet-active { background:var(--gold)!important; }
+
+
+
+
+/* --- التنسيقات المطورة للقائمة الجانبية وفصل روابط الأقسام --- */
+        .sub-menu-parent-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #f9f9f9;
+            background: transparent;
+        }
+        .sub-menu-item-link {
+            padding: 12px 30px 12px 10px; /* مسافة داخلية متناسقة للجهة اليمنى */
+            flex-grow: 1;
+            color: #555;
+            font-size: 14px;
+            text-decoration: none;
+            transition: color 0.2s, background 0.2s;
+            text-align: right;
+        }
+        .sub-menu-item-link:hover {
+            color: var(--brown) !important;
+            background: #f1f1f1;
+        }
+        .sub-cat-toggle-btn {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            color: #999;
+            transition: color 0.2s, background 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .sub-cat-toggle-btn:hover {
+            color: var(--brown) !important;
+            background: #f1f1f1;
+        }
+        .sub-cat-toggle-btn i {
+            transition: transform 0.3s ease;
+            font-size: 12px;
+        }
+        /* تدوير السهم عند فتح القائمة المنسدلة */
+        .sub-cat-toggle-btn:not(.collapsed) i {
+            transform: rotate(180deg);
+        }
+
+        /* تنسيق الأقسام الفرعية الداخلية */
+        .nested-sub-menu { background-color: #f5f5f5; }
+        .nested-sub-menu-item {
+            padding: 10px 50px 10px 20px; /* إزاحة إضافية لليمين لإظهار التدرج الهرمي */
+            display: block;
+            color: #666;
+            text-decoration: none;
+            font-size: 13px;
+            border-bottom: 1px solid #e9e9e9;
+            transition: color 0.2s, background 0.2s;
+            text-align: right;
+        }
+        .nested-sub-menu-item:hover { color: var(--brown) !important; background: #e9e9e9; }
+
+
+
+
+
+.social-icon-motion {
+    display: inline-block;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* حركة سلسة ومرنة */
+    text-decoration: none !important;
+}
+
+.social-icon-motion:hover {
+    /* يرتفع للأعلى بمقدار 6 بكسل ويكبر بنسبة 20% مع الحفاظ على اللون الأصلي */
+    transform: translateY(-6px) scale(1.2);
+}
+
+
+
+
+
+.accordion-button-custom {
+    font-size: 0.9rem !important; /* تقريباً 14px */
+    font-weight: 600;
+    padding: 10px 12px !important;
+}
+
+/* تنسيق حجم خط الأقسام الفرعية (المستوى الثاني) */
+.sub-menu-item,
+.sub-menu-parent-wrapper a {
+    font-size: 0.825rem !important; /* تقريباً 13px */
+    font-weight: 500;
+    padding: 6px 10px !important;
+}
+
+/* تنسيق حجم خط الأقسام الداخلية المتفرعة (المستوى الثالث) */
+.nested-sub-menu-item {
+    font-size: 0.775rem !important; /* تقريباً 12px */
+    padding: 4px 15px !important; /* زيادة الإزاحة الجانبية لتبدو متداخلة بجمالية */
+}
+
+/* تصغير الأيقونات قليلاً لتتناسب مع حجم الخط الجديد */
+.accordion-button-custom i.main-icon {
+    font-size: 1.1rem !important;
+    margin-left: 8px; /* تباعد الأيقونة عن النص باللغة العربية */
+}
+
+.sub-menu-item i,
+.nested-sub-menu-item i {
+    font-size: 0.9rem !important;
+}
+
+
+
+
+
+
+
+    </style>
+
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+          const currentPage = window.location.pathname;
+          const navItems = document.querySelectorAll('.bottom-nav-item');
+
+          navItems.forEach(item => {
+              // التحقق مما إذا كان رابط الزر يطابق مسار الصفحة الحالية لإعطائه اللون البني النشط
+              if(item.getAttribute('href') === currentPage){
+                  item.classList.add('active');
+              }
+          });
+      });
+    </script>
+</head>
+<body>
+ <!-- استدعاء شريط الإعلانات الاحترافي كملف مستقل ومترابط -->
+    {% include 'includes/announcement_bar.html' %}
+
+
+    <nav class="navbar navbar-expand-lg navbar-dark sticky-top">
+        <div class="container">
+            <button class="hamburger-btn" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarMenu">
+                <i class="bi bi-list"></i>
+            </button>
+
+            <a class="navbar-brand fw-bold fs-5 ms-2 d-flex align-items-center" href="/">
+
+                {% if store_config.logo %}
+                    <img src="{{ store_config.logo.url }}" alt="شعار {{ store_config.store_name }}" style="height: 40px; width: auto; margin-left: 10px; object-fit: contain;">
+                {% else %}
+                    <span style="font-size: 24px; margin-left: 10px;">📚</span>
+                {% endif %}
+
+                <span style="color: {{ store_config.text_color }};">{{ store_config.store_name }}</span>
+            </a>
+
+
+            <div class="search-group-wrapper">
+                <form id="smartSearchForm" method="GET" action="{% url 'global_search' %}">
+                    <div class="input-group">
+                        <select class="form-select search-select-custom" id="searchScope">
+                            <option value="global" selected>بحث شامل</option>
+                            <option value="context">في هذه الصفحة</option>
+                        </select>
+                        <input type="text" name="q" class="form-control search-input-custom" placeholder="ابحث عن كتب، مراجع، أقسام..." value="{{ request.GET.q }}">
+                        <button class="btn btn-success search-btn-custom" type="submit">
+                            <i class="bi bi-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="ms-auto d-flex align-items-center">
+                <a href="{% url 'cart_detail' %}" class="btn btn-success position-relative">
+                    <i class="bi bi-cart3"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 10px;">
+                        {{ cart_count }}
+                    </span>
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarMenu">
+        <div class="offcanvas-header">
+            <h5 class="offcanvas-title fw-bold">القائمة</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+        </div>
+        <div class="offcanvas-body d-flex flex-column">
+            <a href="{% url 'new_home' %}" class="sidebar-link"><i class="bi bi-house main-icon"></i><span>الصفحة الرئيسية</span></a>
+            <a href="/" class="sidebar-link"><i class="bi bi-shop main-icon"></i><span>جميع المنتجات</span></a>
+           <div class="accordion" id="accordionSidebar">
+    {% for main_cat in all_categories %}
+        {% if main_cat.show_on_sidebar %}
+            <div class="accordion-item border-0 bg-transparent">
+                <h2 class="accordion-header">
+                    <button class="accordion-button-custom collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMainCat{{ main_cat.id }}">
+                        <!-- جلب أيقونة القسم الرئيسي ديناميكياً مع وضع أيقونة افتراضية عند عدم الاختيار -->
+                        <i class="{% if main_cat.icon_class %}{{ main_cat.icon_class }}{% else %}bi bi-grid-fill{% endif %} main-icon"></i>
+                        <span>{{ main_cat.name }}</span>
+                    </button>
+                </h2>
+                <div id="collapseMainCat{{ main_cat.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSidebar">
+                    <div class="sub-menu accordion" id="accordionSubCats{{ main_cat.id }}">
+                        {% for cat in main_cat.related_categories.all %}
+                            <!-- الشرط: القسم المرتبط نشط وتم تحديد إظهاره في الصفحة الرئيسية -->
+                            {% if cat.is_active and cat.show_on_homepage %}
+
+                                {% if cat.related_categories.all %}
+                                    <!-- في حال وجود أقسام فرعية داخلية (مستوى ثالث) -->
+                                    <div class="accordion-item border-0 bg-transparent">
+                                        <div class="sub-menu-parent-wrapper">
+                                            <a href="{% url 'category_detail' cat.id %}" class="sub-menu-item-link">
+                                                {% if cat.icon_class %}<i class="{{ cat.icon_class }} me-2 text-secondary"></i>{% endif %}
+                                                {{ cat.name }}
+                                            </a>
+
+                                            <button class="sub-cat-toggle-btn collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#subCat{{ cat.id }}" aria-expanded="false">
+                                                <i class="bi bi-chevron-down"></i>
+                                            </button>
+                                        </div>
+
+                                        <div id="subCat{{ cat.id }}" class="accordion-collapse collapse" data-bs-parent="#accordionSubCats{{ main_cat.id }}">
+                                            <div class="nested-sub-menu">
+                                                {% for subcat in cat.related_categories.all %}
+                                                    {% if subcat.is_active %}
+                                                        <a href="{% url 'category_detail' subcat.id %}" class="nested-sub-menu-item">
+                                                            {% if subcat.icon_class %}<i class="{{ subcat.icon_class }} me-2 text-secondary"></i>{% endif %}
+                                                            {{ subcat.name }}
+                                                        </a>
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                {% else %}
+                                    <!-- في حال كان قسماً منفرداً دون تفرعات داخلية -->
+                                    <a href="{% url 'category_detail' cat.id %}" class="sub-menu-item d-flex align-items-center">
+                                        {% if cat.icon_class %}<i class="{{ cat.icon_class }} me-2 text-secondary"></i>{% endif %}
+                                        <span>{{ cat.name }}</span>
+                                    </a>
+                                {% endif %}
+
+                            {% endif %}
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+</div>
+
+            <a href="{% url 'about_us' %}" class="sidebar-link"><i class="bi bi-people main-icon"></i><span>من نحن؟</span></a>
+
+            <div class="sidebar-footer">
+    {% if social_links %}
+        <p class="small text-muted mb-3">تابعنا على:</p>
+        <div class="social-icons-sidebar d-flex justify-content-center gap-3">
+            {% for link in social_links %}
+                {% if link.show_in_sidebar %}
+                    <a href="{{ link.url }}" class="social-icon-motion {{ link.bs_color_sidebar }} fs-4" target="_blank" title="{{ link.name }}">
+                        <i class="bi {{ link.icon_class }}"></i>
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+
+        </div>
+    </div>
+
+    <div class="container my-4">
+        {% block content %}{% endblock %}
+    </div>
+
+    {% if request.resolver_match.url_name != 'book_detail' %}
+    <div id="store-reviews-section">
+        {% include 'includes/reviews_section.html' %}
+    </div>
+    {% endif %}
+
+
+<!-- [استدعاء ديناميكي] بانر طلب الكتب عبر الواتساب من ملف منفصل -->
+{% include 'includes/whatsapp_banner.html' %}
+
+
+
+
+
+
+
+
+
+
+    <footer class="footer">
+        <div class="container">
+            <div class="row g-4">
+                <div class="col-md-6 text-center text-md-start">
+                    <h5>عن مكتبة السقاف</h5>
+                    <p class="small text-white-50">منصتكم المتخصصة لتوفير الكتب والمراجع الطبية والجامعية العلمية.</p>
+                    <!-- [تعديل ديناميكي] أيقونات الفوتر الرئيسي -->
+<div class="social-links-footer mt-3">
+    {% for link in social_links %}
+        {% if link.show_in_footer %}
+            <a href="{{ link.url }}" class="mx-2" target="_blank" title="{{ link.name }}">
+                <i class="bi {{ link.icon_class }}"></i>
+            </a>
+        {% endif %}
+    {% endfor %}
+</div>
+
+                </div>
+                <div class="col-md-6 text-center text-md-end">
+                    <h5>روابط سريعة</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/" class="text-decoration-none text-light small">الرئيسية</a></li>
+                        <li class="mb-2"><a href="{% url 'cart_detail' %}" class="text-decoration-none text-light small">سلة المشتريات</a></li>
+                    </ul>
+                    <p class="small mt-4 mb-0 text-white-50">© 2026 مكتبة السقاف. جميع الحقوق محفوظة.</p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <div class="bottom-nav">
+        <a href="{% url 'new_home' %}" class="bottom-nav-item"><i class="bi bi-house"></i><span>الرئيسية</span></a>
+        <a href="/" class="bottom-nav-item"><i class="bi bi-shop"></i><span>المتجر</span></a>
+        <a href="{% url 'cart_detail' %}" class="bottom-nav-item position-relative"><i class="bi bi-cart3"></i><span>السلة</span></a>
+        <!-- تم ربط الرابط بحقل whatsapp_link الموجود في إعدادات المتجر -->
+    <a href="{{ store_config.whatsapp_link }}" class="bottom-nav-item" target="_blank">
+        <i class="bi bi-whatsapp"></i><span>واتساب</span>
+    </a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const searchScope = document.getElementById('searchScope');
+            const currentUrl = window.location.pathname;
+            const urlParams = new URLSearchParams(window.location.search);
+
+            // 1. تحديد الصفحات المدعومة للتصفية الداخلية (home, new_home, category_detail)
+            const isSupportedPage = currentUrl.includes('/category/') || currentUrl.includes('/new-home/') || currentUrl === '/';
+
+            if (!isSupportedPage) {
+                // إخفاء خيار "في هذه الصفحة" في الصفحات غير المدعومة
+                if (searchScope) {
+                    const contextOption = searchScope.querySelector('option[value="context"]');
+                    if (contextOption) { contextOption.remove(); }
+                }
+            } else {
+                // استقرار الاختيار على "في هذه الصفحة" بعد الضغط إذا كان هناك نص بحث نشط في الرابط
+                if (urlParams.has('q') && urlParams.get('q').trim() !== '') {
+                    searchScope.value = 'context';
+                }
+            }
+        });
+
+        // التحكم الذكي عند إرسال نموذج البحث
+        document.getElementById('smartSearchForm').addEventListener('submit', function(e) {
+            const scope = document.getElementById('searchScope').value;
+            const currentUrl = window.location.pathname;
+            const textInput = this.querySelector('input[name="q"]');
+            const textValue = textInput.value.trim();
+
+            if (textValue === '') {
+                e.preventDefault();
+                window.location.href = window.location.pathname;
+                return;
+            }
+
+            if (scope === 'context') {
+                const isSupportedPage = currentUrl.includes('/category/') || currentUrl.includes('/new-home/') || currentUrl === '/';
+                if (isSupportedPage) {
+                    e.preventDefault();
+                    window.location.href = window.location.pathname + '?q=' + encodeURIComponent(textValue);
+                }
+            }
+        });
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

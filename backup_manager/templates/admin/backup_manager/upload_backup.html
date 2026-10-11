@@ -1,0 +1,13 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+
+{% block content %}
+<h1>{% trans "رفع نسخة احتياطية خارجية" %}</h1>
+<p>{% trans "اختر ملف JSON لنسخة احتياطية قمت بتصديرها مسبقاً (مثل ملف dumpdata)." %}</p>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <input type="submit" value="{% trans 'رفع وحفظ النسخة' %}" class="default">
+    <a href="../" class="button cancel-link">{% trans "إلغاء" %}</a>
+</form>
+{% endblock %}

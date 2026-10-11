@@ -1,0 +1,66 @@
+<style>
+    .section-title-wrapper {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 35px 0 15px;
+        padding-right: 12px;
+        border-right: 4px solid var(--primary-color, #d4af37);
+    }
+    .section-title {
+        font-weight: 700;
+        font-size: 1.2rem;
+        margin: 0;
+        color: var(--text-dark, #4e342e);
+    }
+    .section-title i {
+        color: var(--primary-color, #d4af37);
+    }
+    .view-all-link {
+        color: var(--primary-color, #d4af37);
+        transition: color 0.3s ease;
+    }
+    .view-all-link:hover {
+        color: #b8860b; /* تأثير التمرير للذهبي الغامق */
+    }
+</style>
+
+<div class="mt-5 position-relative">
+    <!-- هيكل العنوان الجديد المتوافق مع الطرفين -->
+    <div class="section-title-wrapper">
+        <h4 class="section-title">
+            <!-- إذا تم تمرير icon_class نستخدمه فوراً، وإلا نعتمد على block.icon_class الخاص بالصفحات الديناميكية -->
+             <i class="{% if icon_class %}{{ icon_class }}{% else %}{{ block.icon_class }}{% endif %} {% if icon_color %}{{ icon_color }}{% else %}{{ block.icon_color }}{% endif %} me-1"></i>  {{ slider_title }}
+        </h4>
+        <a href="{% url 'category_detail' cat_id %}" class="text-decoration-none view-all-link small fw-bold">عرض الكل</a>
+    </div>
+
+
+    <div class="swiper product-swiper">
+        <div class="swiper-wrapper">
+            {% for book in books_list %}
+            <div class="swiper-slide">
+                {% include 'includes/book_card.html' with book=book show_cart_btn=false %}
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- كود الـ JavaScript الخاص بحركة سلايدر الكتب فقط -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        if (document.querySelector('.product-swiper')) {
+            new Swiper('.product-swiper', {
+                slidesPerView: 2.2,
+                spaceBetween: 15,
+                loop: true,
+                autoplay: { delay: 3500, disableOnInteraction: false },
+                breakpoints: {
+                    768: { slidesPerView: 4 },
+                    1024: { slidesPerView: 5 }
+                }
+            });
+        }
+    });
+</script>

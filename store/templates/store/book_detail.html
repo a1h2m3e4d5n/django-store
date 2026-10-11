@@ -1,0 +1,327 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<!-- استدعاء مكتبة أيقونات بوتستراب الرسمية لضمان عملها بنسبة 100% -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+
+<div class="container mt-4 mb-5">
+    <div class="row g-4 bg-white p-3 rounded-4 shadow-sm border">
+
+        <div class="col-md-5 text-center">
+            <div class="bg-light rounded-4 p-3 d-flex align-items-center justify-content-center mb-3" style="min-height: 300px;">
+                {% if book.cover_image %}
+                    <img src="{{ book.cover_image.url }}" class="img-fluid rounded-4" style="max-height: 350px; object-fit: contain;" alt="{{ book.title }}">
+                {% else %}
+                    <!-- تم استبدالها بأيقونة بوتستراب -->
+                    <i class="bi bi-image text-muted fs-1"></i>
+                {% endif %}
+            </div>
+
+            <div class="d-flex align-items-center justify-content-center gap-2 my-2 flex-wrap bg-light p-2 px-3 rounded-pill border mx-auto" style="width: fit-content; border-color: #eedda9 !important;">
+                <div class="text-warning fs-5">
+                    {{ book.average_rating_emoji }}
+                </div>
+                <span class="text-muted small">| {{ book.approved_reviews_count }} رأي</span>
+                <a href="#reviews-section" class="btn btn-success btn-sm rounded-pill px-3 fw-bold border-0 shadow-sm ms-1" style="font-size: 13px;">
+                    تقييم الكتاب <i class="bi bi-arrow-down ms-1" style="font-size: 11px;"></i>
+                </a>
+            </div>
+        </div>
+
+        <div class="col-md-7 d-flex flex-column justify-content-between">
+            <div>
+                <div class="mb-2">
+                    {% for cat in book.categories.all %}
+                        <a href="{% url 'category_detail' cat.id %}" class="badge btn-success px-3 py-2 rounded-pill text-decoration-none text-white me-1" >
+                            {{ cat.name }}
+                        </a>
+                    {% empty %}
+                        <span class="badge bg-secondary px-3 py-2 rounded-pill" >بدون قسم</span>
+                    {% endfor %}
+                </div>
+
+                <h1 class="fw-bold text-dark h3 mb-1">{{ book.title }}</h1>
+                <p class="text-muted mb-3"> <span class="text-dark fw-semibold">{{ book.author }}</span></p>
+
+                <hr class="text-muted opacity-25 my-3">
+
+                <div class="mb-4 d-flex align-items-center gap-2 flex-wrap">
+                    {% if book.discount_price %}
+                        <span class="fs-3 fw-bold text-success">{{ book.discount_price }} ر.ي</span>
+                        <span class="text-muted text-decoration-line-through fs-5 ms-1">{{ book.price }} ر.ي</span>
+                    {% else %}
+                        <span class="fs-3 fw-bold text-dark">{{ book.price }} ر.ي</span>
+                    {% endif %}
+                </div>
+
+                <p class="text-secondary small mb-4" style="line-height: 1.8; white-space: pre-line;">
+                   {% if book.description %} {{ book.description }} {% else %} لم يتم إضافة وصف تفصيلي لهذا الكتاب بعد. {% endif %}
+                </p>
+            </div>
+
+            <div class="bg-light p-3 rounded-4 border">
+                <div class="row g-3 align-items-center">
+                    <div class="col-auto">
+                        <div class="input-group" style="width: 130px;">
+                            <button class="btn btn-outline-secondary fw-bold" type="button" onclick="changeQty(1)">+</button>
+                            <input type="number" id="book_qty" class="form-control text-center fw-bold bg-white" value="1" min="1" readonly>
+                            <button class="btn btn-outline-secondary fw-bold" type="button" onclick="changeQty(-1)">-</button>
+                        </div>
+                    </div>
+                    <div class="col row g-2 m-0 action-buttons-container">
+                        <div class="col-sm-6 p-0 px-1">
+                            <form action="{% url 'add_to_cart' book.id %}" method="POST" onsubmit="syncQuantity(this)">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" class="hidden-qty" value="1">
+                                <button type="submit" class="btn btn-outline-success w-100 fw-bold py-2 rounded-pill shadow-sm">
+                                    <i class="bi bi-cart-plus me-1"></i> أضف إلى السلة
+                                </button>
+                            </form>
+                        </div>
+                        <div class="col-sm-6 p-0 px-1">
+                            <form action="{% url 'buy_now' book.id %}" method="POST" onsubmit="syncQuantity(this)">
+                                {% csrf_token %}
+                                <input type="hidden" name="quantity" class="hidden-qty" value="1">
+                                <button type="submit" class="btn btn-success w-100 fw-bold py-2 rounded-pill shadow-sm" >
+                                    <i class="bi bi-lightning-charge me-2"></i> اشترِ الآن
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- تم التعديل هنا: إضافة أيقونة القلب الأحمر من بوتستراب -->
+    {% if suggested_books %}
+        {% include 'includes/swiper_slider.html' with cat_id=current_category.id icon_class="bi bi-heart-fill text-danger"  slider_title="منتجات سوف تعجبك" books_list=suggested_books %}
+    {% endif %}
+
+       <!-- 2. سلايدر أقسام صفحة التفاصيل (يستخدم أيقونة القسم الديناميكية الممررة من الـ view) -->
+    <!-- سلايدر الأقسام السفلية (يقرأ أيقونة كل قسم مباشرة بعد تمرير الكائن بالكامل من الـ views) -->
+     <!-- سلايدر الأقسام السفلية (يمرر كائن القسم بالكامل ويقرأ الأيقونة واللون الخاصين به ديناميكياً) -->
+    {% if detail_categories %}
+        {% for item in detail_categories %}
+            {% include 'includes/swiper_slider.html' with cat_id=item.category.id icon_class=item.category.icon_class|default:"fa-solid fa-folder-open" icon_color=item.category.icon_color|default:"text-success" slider_title=item.category.name books_list=item.books %}
+        {% endfor %}
+    {% endif %}
+
+
+
+    {% if dynamic_layout %}
+    {% for block in dynamic_layout %}
+        {% if block.type == 'quick_cats' %}
+            {% include 'includes/quick_cats.html' with categories_list=block.categories %}
+
+        {% elif block.type == 'book_slider' %}
+            {% include 'includes/swiper_slider.html' with cat_id=block.category_id icon_class="bi bi-layers-half text-primary" slider_title=block.title books_list=block.books %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+
+
+
+
+    <div class="row mt-5" id="reviews-section">
+        <div class="col-12 bg-white p-4 rounded-4 shadow-sm border">
+            <div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-2">
+                <h3 class="fw-bold h5 mb-0"><i class="bi bi-star-fill text-warning me-2"></i> تقييمات وآراء القراء</h3>
+                <button type="button" id="btn-trigger-review" class="btn btn-success btn-sm rounded-pill px-4 py-2 fw-bold"  onclick="handleReviewActivation()">
+                    <i class="bi bi-pencil-square me-1"></i> إضافة تقييمك للكتاب
+                </button>
+            </div>
+
+            <div id="review-status-alert" class="alert alert-warning rounded-4 d-none mb-3 small py-2 fw-bold"></div>
+
+            <div id="book-review-card" class="card rounded-4 bg-light border-0 p-4 mb-4 d-none animate__animated animate__fadeIn shadow-inner">
+                <h5 class="fw-bold h6 text-dark mb-3">أهلاً بك <span id="customer-detected-name" class="text-success"></span>، يسعدنا مشاركة رأيك:</h5>
+                <form action="{% url 'add_book_review' book.id %}" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" name="buyer_tokens" id="buyer_tokens_hidden_input">
+
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <label class="form-label small fw-bold text-secondary">التقييم بالنجوم</label>
+                            <select name="rating" class="form-select rounded-pill small bg-white border text-warning fw-bold" required>
+                                <option value="5">⭐⭐⭐⭐⭐ (ممتاز)</option>
+                                <option value="4">⭐⭐⭐⭐ (جيد جداً)</option>
+                                <option value="3">⭐⭐⭐ (متوسط)</option>
+                                <option value="2">⭐⭐ (مقبول)</option>
+                                <option value="1">⭐ (ضعيف)</option>
+                            </select>
+                        </div>
+                        <div id="custom-name-field-wrapper" class="mb-3 d-none">
+                            <label class="form-label fw-bold text-secondary">اسمك الكريم (اختياري):</label>
+                            <input type="text" name="custom_customer_name" class="form-control rounded-3" placeholder="اكتب اسمك الذي سيظهر مع التعليق...">
+                        </div>
+                        <div class="col-12">
+                            <label class="form-label small fw-bold text-secondary">اكتب تعليقك ومراجعتك للكتاب</label>
+                            <textarea name="comment" rows="3" class="form-control rounded-4 bg-white border p-3" placeholder="كيف تجد محتوى الكتاب وجودته؟" required></textarea>
+                        </div>
+                        <div class="col-12 text-end">
+                            <button type="submit" class="btn btn-success rounded-pill px-5 py-2 fw-bold shadow-sm">إرسال التقييم للمراجعة</button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+
+            <div class="review-list mt-3">
+                {% for review in book_reviews %}
+                    <div class="d-flex align-items-start gap-3 p-3 mb-3 bg-light rounded-4 border-0 position-relative shadow-sm transition-hover">
+                        <div class="avatar-circle d-flex align-items-center justify-content-center flex-shrink-0 bg-success text-white fw-bold rounded-circle shadow-sm"
+                             style="width: 46px; height: 46px; font-size: 17px; user-select: none;">
+                            {{ review.customer_name|slice:":1"|upper }}
+                        </div>
+
+                        <div class="w-100">
+                            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                                <h6 class="mb-0 fw-bold d-inline-flex align-items-center" style="gap: 5px;">
+                                    {{ review.customer_name }}
+                                    <!-- أيقونة التوثيق الزرقاء المضمونة SVG -->
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="#1da1f2" viewBox="0 0 16 16" title="عميل موثق">
+                                        <path d="M10.067.87a2.89 2.89 0 0 0-4.134 0l-.622.638-.89-.011a2.89 2.89 0 0 0-2.924 2.924l.01.89-.636.622a2.89 2.89 0 0 0 0 4.134l.637.622-.011.89a2.89 2.89 0 0 0 2.924 2.924l.89-.01.622.636a2.89 2.89 0 0 0 4.134 0l.622-.637.89.011a2.89 2.89 0 0 0 2.924-2.924l-.01-.89.636-.622a2.89 2.89 0 0 0 0-4.134l-.637-.622.011-.89a2.89 2.89 0 0 0-2.924-2.924l-.89.01zm.287 5.984-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7 8.793l2.646-2.647a.5.5 0 0 1 .708.708"/>
+                                    </svg>
+                                </h6>
+                                <small class="text-muted opacity-75" style="font-size: 11px;"><i class="bi bi-clock me-1"></i>{{ review.created_at|date:"Y-m-d" }}</small>
+                            </div>
+
+                            <div class="text-warning my-1 small">
+                                {% if review.rating == 5 %}⭐⭐⭐⭐⭐
+                                {% elif review.rating == 4 %}⭐⭐⭐⭐
+                                {% elif review.rating == 3 %}⭐⭐⭐
+                                {% elif review.rating == 2 %}⭐⭐
+                                {% else %}⭐{% endif %}
+                            </div>
+
+                            <p class="text-secondary small mb-0 lh-base mt-1" style="font-size: 14px;">{{ review.comment }}</p>
+                        </div>
+                    </div>
+                {% empty %}
+                    <div class="text-center py-4 text-muted rounded-4 bg-light border border-dashed">
+                        <p class="text-muted text-center small py-2 my-0">لا توجد تقييمات سابقة مضافه لهذا الكتاب بعد. كُن أول من يقيمه عند استلام طلبك!</p>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* تنسيقات الجمالية والأطراف الناعمة الدائرية بالكامل متوافقة مع الهوية الفاخرة */
+    html {
+        scroll-behavior: smooth;
+    }
+    .rounded-4 {
+        border-radius: 1rem !important;
+    }
+    .shadow-inner {
+        box-shadow: inset 0 2px 4px rgba(0,0,0,0.03);
+    }
+    .transition-hover:hover {
+        transform: translateY(-2px);
+        transition: all 0.2s ease-in-out;
+    }
+    @media (max-width: 576px) {
+        .action-buttons-container { flex-direction: column; }
+        .action-buttons-container > div { width: 100%; }
+    }
+</style>
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script>
+    function changeQty(amount) {
+        var qtyInput = document.getElementById('book_qty');
+        if (qtyInput) {
+            var currentVal = parseInt(qtyInput.value);
+            var newVal = currentVal + amount;
+            if (newVal >= 1) { qtyInput.value = newVal; }
+        }
+    }
+
+    function syncQuantity(formElement) {
+        var qtyInput = document.getElementById('book_qty');
+        if (qtyInput) {
+            formElement.querySelector('.hidden-qty').value = qtyInput.value;
+        }
+    }
+
+function handleReviewActivation() {
+    const alertBox = document.getElementById('review-status-alert');
+    const reviewCard = document.getElementById('book-review-card');
+    const nameField = document.getElementById('customer-detected-name');
+    const hiddenInput = document.getElementById('buyer_tokens_hidden_input');
+    const customNameWrapper = document.getElementById('custom-name-field-wrapper');
+    const detectedNameWrapper = nameField ? nameField.parentElement : null;
+
+    const ratingSelect = reviewCard.querySelector('select[name="rating"]');
+    const commentTextarea = reviewCard.querySelector('textarea[name="comment"]');
+    const submitBtn = reviewCard.querySelector('button[type="submit"]');
+
+    let tokensRaw = localStorage.getItem('store_buyer_tokens') || '[]';
+    const bookId = "{{ book.id }}";
+
+    alertBox.classList.add('d-none');
+    alertBox.classList.remove('alert-warning', 'alert-info', 'alert-success');
+    reviewCard.classList.add('d-none');
+
+    fetch(`/api/check-review-eligibility/?book_id=${bookId}&tokens=${encodeURIComponent(tokensRaw)}`)
+    .then(response => response.json())
+    .then(data => {
+
+        if (data.clean_invalid_tokens && data.invalid_tokens_to_remove) {
+            try {
+                let currentTokens = JSON.parse(tokensRaw);
+                let filteredTokens = currentTokens.filter(t => !data.invalid_tokens_to_remove.includes(t));
+                localStorage.setItem('store_buyer_tokens', JSON.stringify(filteredTokens));
+                tokensRaw = JSON.stringify(filteredTokens);
+            } catch(e) { console.error(e); }
+        }
+
+        if (data.eligible) {
+            hiddenInput.value = tokensRaw;
+
+            if (data.require_tokens === false) {
+                if (customNameWrapper) customNameWrapper.classList.remove('d-none');
+                if (detectedNameWrapper) detectedNameWrapper.classList.add('d-none');
+            } else {
+                if (customNameWrapper) customNameWrapper.classList.add('d-none');
+                if (detectedNameWrapper) {
+                    detectedNameWrapper.classList.remove('d-none');
+                    nameField.innerText = data.customer_name;
+                }
+            }
+
+            if (data.is_edit_mode) {
+                alertBox.innerText = data.message;
+                alertBox.classList.remove('d-none');
+                alertBox.classList.add('alert-info');
+
+                if (ratingSelect) ratingSelect.value = data.existing_rating;
+                if (commentTextarea) commentTextarea.value = data.existing_comment;
+                if (submitBtn) submitBtn.innerText = "تحديث التقييم الحالي";
+            } else {
+                if (ratingSelect) ratingSelect.value = "5";
+                if (commentTextarea) commentTextarea.value = "";
+                if (submitBtn) submitBtn.innerText = "إرسال التقييم";
+            }
+
+            reviewCard.classList.remove('d-none');
+            reviewCard.scrollIntoView({ behavior: 'smooth' });
+        } else {
+            alertBox.innerText = data.message;
+            alertBox.classList.remove('d-none');
+            alertBox.classList.add('alert-warning');
+        }
+    })
+    .catch(err => {
+        alertBox.innerText = "حدث خطأ أثناء الاتصال بالخادم، يرجى المحاولة لاحقاً.";
+        alertBox.classList.remove('d-none');
+        alertBox.classList.add('alert-warning');
+    });
+}
+</script>
+{% endblock %}

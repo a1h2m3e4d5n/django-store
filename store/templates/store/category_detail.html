@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- استيراد مكتبة Swiper -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+<nav aria-label="breadcrumb" class="mb-3">
+    <ol class="breadcrumb bg-white p-3 rounded shadow-sm border-0 m-0">
+        <li class="breadcrumb-item"><a href="{% url 'home' %}" class="text-decoration-none text-success">الرئيسية</a></li>
+        <li class="breadcrumb-item active fw-bold text-dark" aria-current="page">{{ current_category.name }}</li>
+    </ol>
+</nav>
+
+<!-- تصفح أقسام ذات صلة باستخدام المكون المدمج -->
+{% if assigned_categories %}
+<div class="mb-4">
+    <h6 class="bi bi-justify fw-bold mb-2 text-secondary"><i class="fa-solid fa-arrow-turn-down text-success me-2 rotate-90"></i> تصفح أقسام ذات صلة:</h6>
+    {% include 'includes/quick_cats.html' with categories_list=assigned_categories %}
+</div>
+{% endif %}
+
+<div class="bg-white p-3 rounded shadow-sm border mb-4">
+    <h4 class="bi bi-justify fw-bold text-dark m-0"><i class="fa-solid fa-book-open text-success me-2"></i> كتب قسم: {{ current_category.name }}</h4>
+</div>
+
+<!-- شبكة المنتجات باستدعاء كرت الكتاب الموحد والمدمج بالتنسيق -->
+{% if books %}
+<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 mb-5">
+    {% for book in books %}
+    <div class="col">
+        {% include 'includes/book_card.html' with book=book show_cart_btn=true %}
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- السلايدرات السفلية المقترحة المدارة بالمكون الفرعي المستقل بالكامل -->
+{% if suggested_books %}
+    {% include 'includes/swiper_slider.html' with cat_id=current_category.id icon_class="bi bi-heart-fill text-danger" slider_title="منتجات سوف تعجبك" books_list=suggested_books %}
+{% endif %}
+
+<!-- سلايدر الأقسام السفلية (يقرأ أيقونة كل قسم مباشرة بعد تمرير الكائن بالكامل من الـ views) -->
+<!-- سلايدر الأقسام السفلية (يمرر كائن القسم بالكامل ويقرأ الأيقونة واللون الخاصين به ديناميكياً) -->
+{% if detail_categories %}
+    {% for item in detail_categories %}
+        {% include 'includes/swiper_slider.html' with cat_id=item.category.id icon_class=item.category.icon_class|default:"fa-solid fa-folder-open" icon_color=item.category.icon_color|default:"text-success" slider_title=item.category.name books_list=item.books %}
+    {% endfor %}
+{% endif %}
+
+
+<!-- [لم يتم تغيير هذا الجزء] الصفحات الديناميكية تعمل بسلاسة كما هي دون أي مساس -->
+{% if dynamic_layout %}
+    {% for block in dynamic_layout %}
+        {% if block.type == 'quick_cats' %}
+            {% include 'includes/quick_cats.html' with categories_list=block.categories %}
+
+        {% elif block.type == 'book_slider' %}
+            {% include 'includes/swiper_slider.html' with cat_id=block.category_id icon_class="bi bi-layers-half text-primary" slider_title=block.title books_list=block.books %}
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+{% endblock %}
+
+

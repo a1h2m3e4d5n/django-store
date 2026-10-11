@@ -1,0 +1,10 @@
+{% extends "admin/change_list.html" %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+    <li>
+        <a href="analytics/" style="background-color: #20c997; color: white; border-radius: 4px; padding: 6px 15px; font-weight: bold; text-decoration: none; font-size: 14px; margin-right: 10px;">
+            📊 عرض لوحة التحليل الشامل
+        </a>
+    </li>
+{% endblock %}

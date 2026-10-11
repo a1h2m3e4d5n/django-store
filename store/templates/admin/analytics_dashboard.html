@@ -1,0 +1,331 @@
+{% extends "admin/base_site.html" %}
+{% load i18n static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+    .analytics-card {
+        border-radius: 12px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        transition: transform 0.2s;
+    }
+    .analytics-card:hover {
+        transform: translateY(-2px);
+    }
+    .form-select, .form-control {
+        border-radius: 8px;
+        border: 1px solid #dee2e6;
+        transition: border-color 0.2s;
+    }
+    .form-select:focus, .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+    .btn-custom {
+        border-radius: 8px;
+        padding: 8px 20px;
+        font-weight: 500;
+    }
+    th {
+        background-color: #f8f9fa !important;
+        color: #333 !important;
+        font-weight: 600;
+    }
+    .metric-value {
+        font-size: 2rem;
+        font-weight: 800;
+    }
+    .table-responsive {
+        border-radius: 8px;
+        overflow: hidden;
+    }
+    .badge {
+        font-weight: 500;
+    }
+    .filter-section {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 25px;
+    }
+    .chart-container {
+        position: relative;
+        height: 300px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4" dir="rtl" style="text-align: right; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;">
+
+    <!-- قسم الفلترة المتقاطعة -->
+    <div class="filter-section">
+        <h5 class="mb-4 text-dark fw-bold">
+            <i class="fas fa-filter"></i> أدوات الفلترة المتقاطعة (الفلترة الدقيقة)
+        </h5>
+        <form method="GET" class="row g-3">
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-semibold">المنصة / مصدر الحركة</label>
+                <select name="platform" class="form-select">
+                    <option value="">كل المنصات</option>
+                    {% for p in dropdowns.platforms %}
+                        <option value="{{ p }}" {% if filters.platform == p %}selected{% endif %}>{{ p }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-semibold">الدولة</label>
+                <select name="country" class="form-select">
+                    <option value="">كل الدول</option>
+                    {% for c in dropdowns.countries %}
+                        <option value="{{ c }}" {% if filters.country == c %}selected{% endif %}>{{ c }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-semibold">المنطقة / المحافظة</label>
+                <select name="region" class="form-select">
+                    <option value="">كل المناطق</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-semibold">المدينة</label>
+                <select name="city" class="form-select">
+                    <option value="">كل المدن</option>
+                    {% for city in dropdowns.cities %}
+                        <option value="{{ city }}" {% if filters.city == city %}selected{% endif %}>{{ city }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-semibold">من تاريخ</label>
+                <input type="date" name="date_from" class="form-control" value="{{ filters.date_from }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label text-muted small fw-semibold">إلى تاريخ</label>
+                <input type="date" name="date_to" class="form-control" value="{{ filters.date_to }}">
+            </div>
+            <div class="col-12 d-flex justify-content-start gap-2 mt-3">
+                <button type="submit" class="btn btn-primary btn-custom">
+                    <i class="fas fa-search"></i> تطبيق الفلترة المتقاطعة
+                </button>
+                <a href="?" class="btn btn-outline-secondary btn-custom">
+                    <i class="fas fa-redo"></i> إعادة ضبط المؤشرات
+                </a>
+            </div>
+        </form>
+    </div>
+
+    <!-- قسم المؤشرات الرئيسية -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-3">
+            <div class="card analytics-card border-start border-primary border-4 text-dark p-3 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small mb-2">
+                        <i class="fas fa-users"></i> الزوار الفريدين
+                    </h6>
+                    <div class="metric-value text-primary">{{ unique_visitors }}</div>
+                    <small class="text-muted">أشخاص حقيقيين زاروا المتجر</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card analytics-card border-start border-info border-4 text-dark p-3 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small mb-2">
+                        <i class="fas fa-clock"></i> عدد الجلسات
+                    </h6>
+                    <div class="metric-value text-info">{{ sessions }}</div>
+                    <small class="text-muted">إجمالي فترات التصفح للزوار</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card analytics-card border-start border-secondary border-4 text-dark p-3 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small mb-2">
+                        <i class="fas fa-eye"></i> مشاهدات الصفحات
+                    </h6>
+                    <div class="metric-value text-secondary">{{ page_views }}</div>
+                    <small class="text-muted">إجمالي عدد الصفحات المحملة</small>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card analytics-card border-start border-warning border-4 text-dark p-3 h-100">
+                <div class="card-body">
+                    <h6 class="text-muted text-uppercase small mb-2">
+                        <i class="fas fa-shopping-cart"></i> معدل التحويل
+                    </h6>
+                    <div class="metric-value text-warning">{{ conversion_rate }}%</div>
+                    <small class="text-muted">نسبة الزوار الذين أتموا طلب</small>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6 mt-3">
+            <div class="card analytics-card border-start border-warning border-4 text-dark p-3 h-100 bg-light">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase small">إجمالي طلبات الشراء المتأثرة</h6>
+                        <h2 class="fw-bold mb-0 mt-2 text-warning">{{ total_orders }}</h2>
+                    </div>
+                    <i class="fas fa-shopping-bag fa-3x text-warning opacity-25"></i>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 mt-3">
+            <div class="card analytics-card border-start border-success border-4 text-dark p-3 h-100 bg-light">
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-muted text-uppercase small">الطلبات المكتملة والمُسلمة</h6>
+                        <h2 class="fw-bold mb-0 mt-2 text-success">{{ completed_orders }}</h2>
+                    </div>
+                    <i class="fas fa-check-circle fa-3x text-success opacity-25"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم الرسوم البيانية -->
+    <div class="row mb-4 g-3">
+        <div class="col-md-7">
+            <div class="card analytics-card h-100">
+                <div class="card-header bg-transparent fw-bold text-secondary border-0 pt-3">
+                    <i class="fas fa-chart-bar"></i> الزوار حسب المنصات (مبني على الفلترة)
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="platformChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-5">
+            <div class="card analytics-card h-100">
+                <div class="card-header bg-transparent fw-bold text-secondary border-0 pt-3">
+                    <i class="fas fa-globe"></i> التوزيع الجغرافي (مبني على الفلترة)
+                </div>
+                <div class="card-body">
+                    <div class="chart-container">
+                        <canvas id="countryChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- قسم الجدول التفصيلي -->
+    <div class="card analytics-card">
+        <div class="card-header bg-transparent fw-bold text-secondary border-0 pt-3">
+            <i class="fas fa-table"></i> توزيع حركة المرور التفصيلية للمناطق المفلترة
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0 text-center">
+                    <thead>
+                        <tr>
+                            <th><i class="fas fa-flag"></i> الدولة</th>
+                            <th><i class="fas fa-map-marker-alt"></i> المنطقة / المحافظة</th>
+                            <th><i class="fas fa-city"></i> المدينة</th>
+                            <th><i class="fas fa-eye"></i> المشاهدات من هذه المنطقة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in visitors_by_city %}
+                        <tr>
+                            <td class="fw-semibold">{{ item.country }}</td>
+                            <td><span class="badge bg-light text-dark px-3 py-2">{{ item.region }}</span></td>
+                            <td><span class="badge bg-light text-dark px-3 py-2">{{ item.city }}</span></td>
+                            <td class="fw-bold text-primary">{{ item.count }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="4" class="text-muted py-4">
+                                <i class="fas fa-inbox"></i> لا توجد بيانات مطابقة لهذه الفلترة المتقاطعة (النتيجة: صفر).
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- إضافة Font Awesome للأيقونات -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+
+<script>
+    const chartOptions = {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                position: 'bottom',
+                labels: {
+                    font: { family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" },
+                    padding: 15,
+                    usePointStyle: true
+                }
+            }
+        }
+    };
+
+    // رسم بياني شريطي أفقي للمنصات
+    const ctxPlatform = document.getElementById('platformChart');
+    if (ctxPlatform) {
+        new Chart(ctxPlatform.getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: {{ chart_platforms|safe }},
+                datasets: [{
+                    label: 'عدد الزيارات',
+                    data: {{ chart_platforms_data|safe }},
+                    backgroundColor: ['#3498db', '#e74c3c', '#2ecc71', '#f39c12', '#9b59b6', '#1abc9c'],
+                    borderRadius: 6,
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                indexAxis: 'y',
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { display: false } },
+                scales: {
+                    x: {
+                        beginAtZero: true,
+                        grid: { display: false },
+                        ticks: { font: { family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" } }
+                    },
+                    y: {
+                        grid: { display: false },
+                        ticks: { font: { family: "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif" } }
+                    }
+                }
+            }
+        });
+    }
+
+    // رسم بياني دائري مجوف للدول
+    const ctxCountry = document.getElementById('countryChart');
+    if (ctxCountry) {
+        new Chart(ctxCountry.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: {{ chart_countries|safe }},
+                datasets: [{
+                    data: {{ chart_countries_data|safe }},
+                    backgroundColor: ['#16a085', '#2980b9', '#8e44ad', '#f39c12', '#d35400', '#c0392b', '#27ae60'],
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: chartOptions
+        });
+    }
+</script>
+{% endblock %}

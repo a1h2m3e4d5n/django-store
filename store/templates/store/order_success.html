@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5 text-center">
+    <div class="card shadow-sm p-5 border-0 position-relative">
+
+        <a href="{{ previous_page }}" class="btn btn-outline-secondary position-absolute btn-back-arrow" title="العودة للواجهة السابقة">
+            <i class="bi bi-arrow-right"></i> </a>
+
+        <div class="text-success" style="font-size: 80px;">
+            <i class="fa fa-check-circle"></i>
+        </div>
+
+        <h2 class="mt-4">شكراً لك! تم استلام طلبك بنجاح</h2>
+        <p class="text-muted mt-2">لقد قمنا بتسجيل طلبك وسنتواصل معك قريباً.</p>
+
+        <div class="alert alert-light mt-4">
+            رقم الطلب الخاص بك هو: <strong>#{{ order.id }}</strong>
+        </div>
+
+        <div class="mt-4">
+            <a href="/" class="btn btn-success px-5 rounded-pill fw-bold py-2">العودة للرئيسية</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* الحفاظ الكامل على التنسيقات المعتمدة من قبلك باستخدام Bootstrap */
+    .btn-back-arrow {
+        top: 20px;
+        right: 20px;
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0;
+        border: 1px solid #dee2e6;
+        background-color: #ffffff;
+        color: #6c757d;
+        transition: all 0.2s ease-in-out;
+    }
+
+    .btn-back-arrow:hover {
+        background-color: #f8f9fa;
+        color: #198754;
+        border-color: #198754;
+        transform: scale(1.05);
+    }
+
+    .btn-back-arrow i {
+        font-size: 18px;
+        line-height: 1;
+    }
+</style>
+
+{% if order.buyer_token %}
+<script>
+    (function() {
+        let tokens = [];
+        try {
+            // جلب الرموز السابقة إن وجدت، أو إنشاء مصفوفة فارغة جديدة
+            tokens = JSON.parse(localStorage.getItem('store_buyer_tokens')) || [];
+            if (!Array.isArray(tokens)) tokens = [];
+        } catch (e) {
+            tokens = [];
+        }
+
+        let currentToken = "{{ order.buyer_token }}";
+        // إضافة التوكن الجديد للمصفوفة التراكمية في حال لم يكن مضافاً من قبل
+        if (currentToken && !tokens.includes(currentToken)) {
+            tokens.push(currentToken);
+            localStorage.setItem('store_buyer_tokens', JSON.stringify(tokens));
+        }
+    })();
+</script>
+{% endif %}
+
+
+{% endblock %}

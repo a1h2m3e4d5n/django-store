@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="mb-4">سلة التسوق</h2>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-body">
+                    {% for id, item in cart.items %}
+                    <div class="row align-items-center mb-3 pb-3 border-bottom">
+                        <div class="col-md-2">
+                            {% if item.image_url %}
+                                <img src="{{ item.image_url }}" alt="{{ item.title }}" style="width: 60px; height: 80px; object-fit: cover; border-radius: 5px;">
+                            {% else %}
+                                <div style="width: 60px; height: 80px; background: #eee; border-radius: 5px;" class="d-flex align-items-center justify-content-center text-muted">؟</div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-4">
+                            <h5>{{ item.title }}</h5>
+                        </div>
+
+                        <div class="col-md-3">
+                            <div class="input-group input-group-sm">
+                                <a href="{% url 'update_cart' id 'minus' %}" class="btn btn-outline-secondary">-</a>
+                                <span class="btn btn-light px-3">{{ item.quantity }}</span>
+                                <a href="{% url 'update_cart' id 'plus' %}" class="btn btn-outline-secondary">+</a>
+                            </div>
+                        </div>
+
+                        <div class="col-md-2 text-end">
+                            <strong>{{ item.price }} ر.ي</strong>
+                        </div>
+
+                        <div class="col-md-1">
+                            <a href="{% url 'remove_from_cart' id %}" class="text-danger"><i class="fa fa-trash"></i></a>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-5">
+                        <p class="fs-4 text-muted">السلة فارغة حالياً.</p>
+                        <a href="/" class="btn btn-success">تصفح الكتب</a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 bg-light">
+                <div class="card-body">
+                    <h5 class="card-title">ملخص الطلب</h5>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-3">
+                        <span>الإجمالي</span>
+                        <strong class="fs-5">{{ total_price }} ر.ي</strong>
+                    </div>
+                    <a href="{% url 'checkout' %}" class="btn btn-success w-100 mt-2">إتمام الطلب</a>
+                    <a href="/" class="btn btn-outline-success w-100 mt-2">متابعة التسوق</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

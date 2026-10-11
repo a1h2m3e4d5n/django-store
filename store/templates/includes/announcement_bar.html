@@ -1,0 +1,73 @@
+{% if show_announcement_bar %}
+<div class="top-announcement-bar">
+    <div class="marquee-container">
+        <!-- المسار الأول للنصوص الإعلانية -->
+        <div class="marquee-content">
+            {% for announcement in announcements %}
+                <span class="announcement-txt">{{ announcement.text }}</span>
+                <span class="announcement-divider">✦</span>
+            {% endfor %}
+        </div>
+        <!-- المسار الثاني (نسخة مطابقة) لخلق حركة دائرية مستمرة بدون انقطاع أو فراغات شاشة -->
+        <div class="marquee-content" aria-hidden="true">
+            {% for announcement in announcements %}
+                <span class="announcement-txt">{{ announcement.text }}</span>
+                <span class="announcement-divider">✦</span>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<style>
+.top-announcement-bar {
+    /* 🎨 سحب الألوان ديناميكياً من لوحة التحكم */
+    background-color: {{ bar_bg_color }};
+    color: {{ bar_text_color }};
+    border-bottom: 2px solid {{ bar_text_color }};
+    padding: 10px 0;
+    font-size: 13.5px;
+    font-weight: 600;
+    overflow: hidden;
+    position: relative;
+    width: 100%;
+    z-index: 9999;
+}
+.marquee-container {
+    display: flex;
+    overflow: hidden;
+    user-select: none;
+    width: 100%;
+    direction: ltr; /* العمل بـ ltr يضمن الحسابات الرياضية للأنيميشن والرسائل بداخلها تدعم العربي تماماً */
+}
+.marquee-content {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: space-around;
+    min-width: 100%;
+    animation: scroll-infinite-loop 30s linear infinite;
+}
+.announcement-txt {
+    direction: rtl; /* لإظهار النصوص العربية والرموز بشكل صحيح ومريح للعين */
+    white-space: nowrap;
+    padding: 0 30px;
+    display: inline-block;
+}
+.announcement-divider {
+    color: {{ bar_text_color }};
+    opacity: 0.8;
+    font-size: 12px;
+}
+
+/* تأثير التوقف الذكي المريح عند مرور الماوس فوق الإعلان لسهولة القراءة */
+.top-announcement-bar:hover .marquee-content {
+    animation-play-state: paused;
+    cursor: pointer;
+}
+
+/* الأنيميشن اللانهائي المستمر دون أي توقف */
+@keyframes scroll-infinite-loop {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
+}
+</style>
+{% endif %}

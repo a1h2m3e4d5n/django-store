@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="bg-white p-4 rounded shadow-sm border mb-4">
+    <h4 class="fw-bold text-dark m-0">
+        <i class="bi bi-search text-success me-2"></i> 
+        نتائج البحث الشامل عن: <span class="text-primary">"{{ query }}"</span>
+    </h4>
+    <p class="text-muted small m-0 mt-2">تم العثور على ({{ books.count }}) مرجع كتاب متوافق.</p>
+</div>
+
+<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3 mb-5">
+    {% for book in books %}
+    <div class="col">
+        {% include 'includes/book_card.html' with book=book show_cart_btn=true %}
+    </div>
+    {% empty %}
+    <div class="col-12 text-center py-5 bg-white rounded shadow-sm border">
+        <i class="bi bi-exclamation-circle text-warning display-4 mb-3 d-block"></i>
+        <h5 class="fw-bold text-secondary">عذراً، لم نجد أي مراجع تطابق بحثك!</h5>
+        <p class="text-muted small">تأكد من كتابة أحرف صحيحة أو ابحث بكلمات عامة مثل (جراحة، طب، أطلس).</p>
+        <a href="{% url 'new_home' %}" class="btn btn-success btn-sm rounded-pill mt-2 px-4">العودة للرئيسية</a>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
