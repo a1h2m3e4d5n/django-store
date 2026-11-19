@@ -796,3 +796,19 @@ def add_book_review(request, book_id):
                 messages.error(request, "عذراً، لم نتمكن من التحقق من صلاحية التقييم.")
 
     return redirect('book_detail', book_id=book_id)
+
+from django.http import HttpResponse
+from django.contrib.auth import get_user_model
+
+def create_admin_temp(request):
+    User = get_user_model()
+    # إذا كان فيه مدير من قبل، لا تسوي واحد جديد
+    if User.objects.filter(username='admin').exists():
+        return HttpResponse("المدير موجود بالفعل، احذف هذا الكود الآن!")
+    
+    User.objects.create_superuser(
+        username='admin',
+        email='admin@admin.com',
+        password='12345678'
+    )
+    return HttpResponse("تم إنشاء المدير بنجاح! ادخل الآن بـ admin / 12345678")
