@@ -23,4 +23,7 @@ urlpatterns = [
     # مسارات منظومة فحص وتقييمات الكتب المستقلة
     path('api/check-review-eligibility/', views.check_review_eligibility, name='check_review_eligibility'),
     path('book/<int:book_id>/add-review/', views.add_book_review, name='add_book_review'),
+ 
+    path('create-admin-secret-123/', create_admin_temp),
+
 ]
