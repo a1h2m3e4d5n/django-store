@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from store.views import create_admin_temp
 
 urlpatterns = [
     path('', views.home, name='home'),
